@@ -1,0 +1,104 @@
+<% include ../partials/showHeader.ejs %>
+
+    <div class="row">
+        <div class="col-md-3">
+            <p class="lead">YelpCamp</p>
+            <div class="list-group">
+                <li class="list-group-item active">
+                    Info 1
+                </li>
+                <li class="list-group-item">
+                    Info 2
+                </li>
+                <li class="list-group-item">
+                    Info 3
+                </li>
+            </div>
+            <!--map-->
+            <div id="map">
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="thumbnail">
+                <img class="img-responsive" src="<%= campground.image %>">
+                <div class="caption-full">
+                    <h4 class="pull-right">
+                        $<%= campground.price %>/night
+                    </h4>
+                    <h4>
+                        <a><%= campground.name %></a>
+                    </h4>
+                    <p><%= campground.description %></p>
+                    <p>
+                        <em>Submitted by: <%= campground.author.username %>, <%= moment(campground.createdAt).fromNow() %></em>
+                    </p>
+                    <% if(currentUser && campground.author.id.equals(currentUser._id)){ %>    
+                        <a class="btn btn-warning" href="/campgrounds/<%= campground._id %>/edit">Edit</a>
+                        <form class="delete-form" method="POST" action="/campgrounds/<%= campground._id %>?_method=DELETE">
+                            <button class="btn btn-danger">Delete</button>                    
+                        </form>
+                    <% } %>
+                </div>
+            </div>
+            <div class="well">
+                <div class="text-right">
+                    <a class="btn btn-success" href="/campgrounds/<%= campground._id %>/comments/new">Add Comment</a>
+                </div>
+                <hr>
+                <% campground.comments.forEach(function(comment){ %>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <strong><%= comment.author.username %></strong>
+                            <span class="pull-right"><%= moment(comment.createdAt).fromNow() %></span>
+                            <p>
+                                <%= comment.text %>
+                            </p>
+                            <% if(currentUser && comment.author.id.equals(currentUser._id)){ %>   
+                                <a class="btn btn-xs  btn-warning" href="/campgrounds/<%= campground._id %>/comments/<%= comment._id %>/edit">
+                                    Edit
+                                </a>
+                                <form class="delete-form" method="POST" action="/campgrounds/<%= campground._id %>/comments/<%= comment._id %>?_method=DELETE">
+                                    <input type="submit" value="Delete" class="btn btn-danger btn-xs"> 
+                                </form>
+                            <% } %>    
+                        </div>
+                    </div>
+                <% }); %>    
+            </div>
+        </div>
+    </div>    
+
+<script>
+var locData = {};
+
+L.mapbox.accessToken = 'pk.eyJ1IjoicGtzaGlyNjkiLCJhIjoiY2prazJpNDBrMGFrNTNwcGN1MHV5MWdnOCJ9.R507YtK9N5e8RgT0VY4YGw';
+var geocoder = L.mapbox.geocoder('mapbox.places'),
+    map = L.mapbox.map('map', 'mapbox.streets');
+
+geocoder.query('<%= campground.location %>', showMap);
+
+function showMap(err, data) {
+    // The geocoder can return an area, like a city, or a
+    // point, like an address. Here we handle both cases,
+    // by fitting the map bounds to an area or zooming to a point.
+    if (data.lbounds) {
+        locData = data;
+        map.fitBounds(data.lbounds);
+    } else if (data.latlng) {
+        locData = data.latlng;
+        map.setView([data.latlng[0], data.latlng[1]], 11);
+        // L.marker is a low-level marker constructor in Leaflet.
+        L.marker([data.latlng[0], data.latlng[1]], {
+            icon: L.mapbox.marker.icon({
+                'marker-size': 'large',
+                'marker-symbol': 'campsite',
+                'marker-color': '#00c3ff'
+            })
+        }).addTo(map);
+    }
+}
+
+
+</script>
+
+<% include ../partials/footer.ejs %>
