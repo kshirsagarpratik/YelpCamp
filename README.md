@@ -19,6 +19,6 @@ This app is a toy replica of Yelp, showcasing campsites.
 
 ### Technologies used
 
-Frontend: HTML, CSS, JavaScript and Bootstrap
-Server: Express.js
-Database: MongoDB
+* Frontend: HTML, CSS, JavaScript and Bootstrap
+* Server: Express.js
+* Database: MongoDB
